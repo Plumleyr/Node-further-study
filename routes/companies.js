@@ -6,7 +6,7 @@ const ExpressError = require('../expressError');
 
 router.get('/', async(req, res, next) => {
     try{
-        const results = await db.query(`SELECT * FROM companies`);
+        const results = await db.query(`SELECT c.code, c.name, c.description, array_agg(i.industry) AS industries FROM companies AS c LEFT JOIN companies_industries AS ci ON c.code = ci.companies_code LEFT JOIN industries AS i ON i.code = ci.industries_code GROUP BY c.code ORDER BY c.code`);
         return res.json({companies: results.rows});
     } catch (e) {
         return next(e);
@@ -15,7 +15,7 @@ router.get('/', async(req, res, next) => {
 
 router.get('/:code', async(req, res, next) =>{
     try{
-        const result = await db.query(`SELECT * FROM companies WHERE code=$1`, [req.params.code])
+        const result = await db.query(`SELECT c.code, c.name, c.description, array_agg(i.industry) AS industries FROM companies AS c LEFT JOIN companies_industries AS ci ON c.code = ci.companies_code LEFT JOIN industries AS i ON i.code = ci.industries_code WHERE c.code=$1 GROUP BY c.code ORDER BY c.code`, [req.params.code])
         if(result.rows.length === 0){
             throw new ExpressError(`no company associated with ${req.params.code}`,404)
         }

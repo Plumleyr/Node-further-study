@@ -59,10 +59,18 @@ describe('POST /invoices', () => {
 });
 
 describe('PUT /invoices/:id', () => {
-    test('updates an invoice', async () => {
-        const result = await request(app).put(`/invoices/${testInvoice.id}`).send({amt: 400});
+    test("updates an invoice that's false with false", async () => {
+        const result = await request(app).put(`/invoices/${testInvoice.id}`).send({amt: 400, paid: false});
         expect(result.statusCode).toBe(200);
         expect(result.body).toEqual({invoice: {id: testInvoice.id, comp_code: 'samsung', amt: 400, paid: false, add_date: testInvoice.add_date, paid_date: null}});
+    });
+
+    test("updates an invoice that's false with true", async () => {
+        const result = await request(app).put(`/invoices/${testInvoice.id}`).send({amt: 400, paid: true});
+        const addDate = new Date(result.body.invoice.paid_date);
+        expect(result.statusCode).toBe(200);
+        expect(result.body).toEqual({invoice: {id: testInvoice.id, comp_code: 'samsung', amt: 400, paid: true, add_date: testInvoice.add_date, paid_date: expect.any(String)}});
+        expect(addDate).toBeInstanceOf(Date);
     });
 
     test('responds with 404 if no invoice', async () => {

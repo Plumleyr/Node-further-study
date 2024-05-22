@@ -1,7 +1,9 @@
 \c biztime
 
 DROP TABLE IF EXISTS invoices;
+DROP TABLE IF EXISTS companies_industries;
 DROP TABLE IF EXISTS companies;
+DROP TABLE IF EXISTS industries;
 
 CREATE TABLE companies (
     code text PRIMARY KEY,
@@ -19,6 +21,20 @@ CREATE TABLE invoices (
     CONSTRAINT invoices_amt_check CHECK ((amt > (0)::double precision))
 );
 
+CREATE TABLE industries (
+  code text PRIMARY KEY,
+  industry text NOT NULL UNIQUE
+);
+
+CREATE TABLE companies_industries (
+  id serial PRIMARY KEY,
+  companies_code text,
+  industries_code text,
+  FOREIGN KEY (companies_code) REFERENCES companies(code) ON DELETE CASCADE,
+  FOREIGN KEY (industries_code) REFERENCES industries(code) ON DELETE CASCADE
+);
+
+
 INSERT INTO companies
   VALUES ('apple', 'Apple Computer', 'Maker of OSX.'),
          ('ibm', 'IBM', 'Big blue.');
@@ -28,3 +44,14 @@ INSERT INTO invoices (comp_Code, amt, paid, paid_date)
          ('apple', 200, false, null),
          ('apple', 300, true, '2018-01-01'),
          ('ibm', 400, false, null);
+
+INSERT INTO industries
+  VALUES('acct', 'Accounting'),
+        ('mkrt', 'Marketing'),
+        ('swd', 'Software Developer');
+
+INSERT INTO companies_industries (companies_code, industries_code)
+  VALUES('apple', 'acct'),
+        ('apple', 'swd'),
+        ('ibm', 'mkrt'),
+        ('ibm', 'swd');
